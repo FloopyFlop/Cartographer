@@ -3,6 +3,7 @@
 node_modules
 dist
 build
+demo
 **/.venv
 **/__pycache__
 **/.pytest_cache
