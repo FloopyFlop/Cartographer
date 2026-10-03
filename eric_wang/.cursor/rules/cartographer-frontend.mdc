@@ -1,0 +1,27 @@
+---
+description: Cartographer frontend — React, shadcn, Cesium isolation, API service layer
+globs: eric_wang/frontend/**/*
+alwaysApply: false
+---
+
+# Cartographer Frontend
+
+## Stack
+
+- React + Vite + TypeScript + Tailwind
+- UI: shadcn/ui only — no parallel component libraries
+- Map: CesiumJS; Titanium via `src/cesium/titanium` adapter stub only
+
+## Structure
+
+- `src/cesium/` — all Cesium/Titanium code; keep out of ordinary React UI components
+- `src/api/` — typed HTTP client; components must not call `fetch` directly
+- `src/models/` — Search, SearchArea, Detection, SearchLayer
+- `src/components/ui/` — shadcn primitives
+- `src/components/search/` — query, area mode, progress, detection detail
+
+## UX
+
+- Full-bleed map; sparse overlays (wordmark, NL search, area mode, quiet progress, slim selection sheet, small layer list)
+- Area modes: viewport, radius, region
+- Progressive search results via polling the Flask job API

@@ -1,0 +1,32 @@
+---
+description: Cartographer backend — Flask, Street View, Gemini, job API, secrets
+globs: eric_wang/backend/**/*
+alwaysApply: false
+---
+
+# Cartographer Backend
+
+## Stack
+
+- Flask + `uv` (`pyproject.toml`)
+- Secrets only in backend `.env`: `GEMINI_API_KEY`, `GOOGLE_MAPS_API_KEY`, optional `GEMINI_MODEL`
+
+## Search jobs
+
+- `POST /api/searches` — create job from NL query + area
+- `GET /api/searches/:id` — status, progress 0–1, accumulating detections, error
+- Lifecycle: queued → running → completed | failed
+- Run pipeline in a background worker; append detections as samples finish
+
+## Pipeline modules
+
+- `geo/sampling` → `imagery/street_view` → `detection/gemini` → job store
+- Cap sample density; skip points with no Street View imagery
+- Gemini returns structured JSON; only emit real positives with usable confidence
+- Default model: `gemini-2.0-flash` (override with `GEMINI_MODEL`)
+
+## Safety
+
+- Never expose API keys to the frontend
+- CORS only for local Vite origin in development
+- Clear errors when keys or APIs are misconfigured

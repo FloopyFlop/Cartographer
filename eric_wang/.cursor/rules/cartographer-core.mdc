@@ -1,0 +1,25 @@
+---
+description: Cartographer product principles — map-first, minimal B/W design, physical-world search
+alwaysApply: true
+---
+
+# Cartographer Core
+
+Cartographer is a search engine for the physical world: user says what to find and where to look; the system returns geolocated detections on a map.
+
+Pipeline: Query → Search Area → Street View → Gemini vision → Detections → Map.
+
+## Always
+
+- Keep the experience map-first. Do not build a dashboard.
+- Use only black, white, and neutral grays unless an accent is explicitly requested.
+- Prefer hierarchy and progressive disclosure over sparse emptiness or decorative chrome.
+- Do not show internal IDs, fake stats, decorative timestamps, or technical metadata without a user task.
+- Preserve geographic context across searches; avoid unnecessary modals.
+- All application code lives under `eric_wang/`. See `eric_wang/PLANNING.md`.
+
+## Never
+
+- Gradients, glows, glass, giant cards, badge clutter, marketing headings, or vibe-coded AI aesthetics.
+- Client-side Gemini or Maps/Street View API keys.
+- Fake detections that pretend to be Gemini results when keys are missing — return a clear config error instead.
