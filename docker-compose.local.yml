@@ -1,0 +1,6 @@
+# Optional loopback port for running Compose outside Coolify.
+# docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+services:
+  cartographer:
+    ports:
+      - "127.0.0.1:${CARTOGRAPHER_LOCAL_PORT:-8080}:5050"

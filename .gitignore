@@ -1,32 +1,17 @@
-# Virtual Environments
-venv/
+node_modules/
+dist/
 .venv/
-env/
-ENV/
-
-# Environment Variables
+__pycache__/
+.pytest_cache/
+*.pyc
 .env
 .env.*
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# IDEs and Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-
-# Application Data
-backend/data/
-data/
-
-# Testing
-test.py
+!.env.example
+build/
+output/
+playwright-report/
+test-results/
+.cache/
+.playwright-cli/
+output/playwright/
+*.tsbuildinfo

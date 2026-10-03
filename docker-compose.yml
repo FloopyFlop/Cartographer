@@ -1,0 +1,59 @@
+services:
+  cartographer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    expose:
+      - "5050"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY as a runtime environment variable}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:?Set GOOGLE_MAPS_API_KEY as a runtime environment variable}
+      CARTOGRAPHER_IMAGERY_PROVIDER: ${CARTOGRAPHER_IMAGERY_PROVIDER:-google}
+      CARTOGRAPHER_MAX_IMAGES: ${CARTOGRAPHER_MAX_IMAGES:-48}
+      CARTOGRAPHER_AUTH_REQUIRED: "true"
+      CARTOGRAPHER_AUTH_USERNAME: ${CARTOGRAPHER_AUTH_USERNAME:-cartographer}
+      CARTOGRAPHER_AUTH_PASSWORD: ${CARTOGRAPHER_AUTH_PASSWORD:?Set a strong CARTOGRAPHER_AUTH_PASSWORD before deployment}
+      CARTOGRAPHER_MONGODB_URI: mongodb://mongo:27017
+      CARTOGRAPHER_MONGODB_DATABASE: ${CARTOGRAPHER_MONGODB_DATABASE:-cartographer}
+      CARTOGRAPHER_CACHE_DIRECTORY: /app/backend/.cache
+      CARTOGRAPHER_HOST: 0.0.0.0
+      CARTOGRAPHER_PORT: "5050"
+    volumes:
+      - application-cache:/app/backend/.cache
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - default
+      - database
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+  mongo:
+    image: mongo:8.0.32
+    restart: unless-stopped
+    command: ["mongod", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25"]
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "if (!db.adminCommand({ping: 1}).ok) { quit(1); }"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 6
+
+volumes:
+  mongo-data:
+  application-cache:
+
+networks:
+  default:
+  database:
+    internal: true
