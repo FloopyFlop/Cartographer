@@ -2,7 +2,7 @@
 
 A map-first search engine for physical features. Built with React, TypeScript, shadcn/ui, CesiumJS, the provided Titanium renderer, and a Flask API. The application lives at the repository root.
 
-For Coolify, choose the **Docker Compose** build pack, base directory `/`, and `/docker-compose.yml`. Supply the Google/OpenAI keys and deployment password as runtime variables, and route your HTTPS domain to the `cartographer` service on port 5050. See [the deployment guide](docs/deployment.md) for exact steps and persistent data handling.
+For Coolify, choose the **Docker Compose** build pack, base directory `/`, and `/docker-compose.yaml`. Supply the Google/OpenAI keys and deployment password as runtime variables, and route your HTTPS domain to the `cartographer` service on port 5050. See [the deployment guide](docs/deployment.md) for exact steps and persistent data handling.
 
 `npm run build:release` produces an organized deployment folder at `build/cartographer/` and a distributable `build/cartographer-release.tar.gz`. It includes the compiled `dist/`, source, locked dependencies, Docker/Compose configuration, and deployment instructions. Keys and database/cache contents are excluded. `dist/` remains the client output used by the production server and Docker image.
 

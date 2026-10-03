@@ -1,5 +1,5 @@
 # Optional loopback port for running Compose outside Coolify.
-# docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+# docker compose -f docker-compose.yaml -f docker-compose.local.yaml up -d --build
 services:
   cartographer:
     ports:

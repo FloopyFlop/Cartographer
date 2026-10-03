@@ -19,7 +19,7 @@ await mkdir(output, { recursive: true })
 // An explicit allowlist keeps keys, MongoDB files and caches out of releases.
 const files = ['dist', 'src', 'public', 'package.json', 'package-lock.json', 'index.html',
   'tsconfig.json', 'vite.config.ts', 'vitest.config.ts', 'postcss.config.js', 'tailwind.config.js', 'components.json', 'scripts',
-  'Dockerfile', 'docker-compose.yml', 'docker-compose.local.yml', '.dockerignore', '.env.example', 'README.md',
+  'Dockerfile', 'docker-compose.yaml', 'docker-compose.local.yaml', '.dockerignore', '.env.example', 'README.md',
   'docs', 'backend/cartographer', 'backend/tests', 'backend/pyproject.toml', 'backend/uv.lock', 'backend/README.md', 'backend/.env.example']
 for (const relative of files) {
   const source = path.join(root, relative)

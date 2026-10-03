@@ -6,7 +6,7 @@ This deployment provides one password-protected application instance. It is not 
 
 ## Coolify setup
 
-1. Add this Git repository as a Coolify application and select **Docker Compose** as the build pack. The application lives at the repository root: use base directory `/` and Compose location `/docker-compose.yml`.
+1. Add this Git repository as a Coolify application and select **Docker Compose** as the build pack. The application lives at the repository root: use base directory `/` and Compose location `/docker-compose.yaml`.
 2. Add the runtime variables `OPENAI_API_KEY`, `GOOGLE_MAPS_API_KEY`, and a strong `CARTOGRAPHER_AUTH_PASSWORD`. Optionally set `CARTOGRAPHER_AUTH_USERNAME`; its default is `cartographer`. Enable Google Street View Static API and Geocoding API for the server's Google key. Keep keys private and configure provider-side restrictions for the deployed server.
 3. Set a domain on the **cartographer** service, including its internal port, for example `https://cartographer.example.com:5050`. Coolify terminates HTTPS and sends traffic to port 5050; visitors use the ordinary HTTPS address. Give the MongoDB service no domain and no published ports.
 4. Keep the Compose-managed `mongo-data` and `application-cache` volumes. Deploy the application. To carry over the existing prototype's caches and spending totals, restore the private backup described below before running any live searches. The MongoDB health check must succeed before the API starts; `/api/health` then checks database readiness without making paid provider requests.
@@ -32,7 +32,7 @@ Add the deployment password to that ignored file or set it in the shell before r
 For local Docker access, use the included override:
 
 ```sh
-docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+docker compose -f docker-compose.yaml -f docker-compose.local.yaml up -d --build
 ```
 
 Open `http://127.0.0.1:8080` and use the username/password from the private `.env`. This override publishes only the application on loopback. MongoDB stays internal. Set `CARTOGRAPHER_LOCAL_PORT` to choose another local port; the Coolify deployment uses the main Compose file without this override.
