@@ -7,6 +7,10 @@ services:
     init: true
     expose:
       - "5050"
+    labels:
+      # Coolify 4.1.2 does not select a network for multi-network services.
+      # Disable its "Escape special characters in labels" option so this resolves.
+      traefik.docker.network: ${COOLIFY_RESOURCE_UUID:-${COMPOSE_PROJECT_NAME:-cartographer}_default}
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY:?Set OPENAI_API_KEY as a runtime environment variable}
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:?Set GOOGLE_MAPS_API_KEY as a runtime environment variable}
