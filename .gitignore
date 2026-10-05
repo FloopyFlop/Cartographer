@@ -15,3 +15,20 @@ test-results/
 .playwright-cli/
 output/playwright/
 *.tsbuildinfo
+
+# Private credentials and local key material.
+keys.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+id_rsa
+id_ed25519
+
+# Local demonstrations, recordings, and operating-system metadata.
+demo/
+cartographer-demo-images/
+Screen Recording *.mov
+.DS_Store

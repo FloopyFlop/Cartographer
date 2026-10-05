@@ -30,6 +30,11 @@ uv run pytest -q
 
 ## Search behavior
 
+Environment templates and existing installations use **Google Street View**.
+Sample mode runs without provider credentials; live searches need your own
+Google Maps and OpenAI keys. Provider imagery and service terms remain separate
+from Cartographer's MIT code license.
+
 - `auto` uses real visual analysis when an OpenAI key and a supported imagery
   provider are available. Otherwise it uses the clearly labeled demonstration
   provider.

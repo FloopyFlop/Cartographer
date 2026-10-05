@@ -2,17 +2,21 @@
 
 Cartographer's current local prototype defaults to **Google Street View**, as requested by its user, with OpenAI visual analysis. **Panoramax remains an optional implemented alternative**: it has real Cornell coverage, needs no new access token for public reads, and exposes item licenses and image assets through a geographic API. KartaView and Mapillary were investigated but are not implemented providers. Search coverage is sampled: a result does not establish that every object in the area has been found.
 
+New installation templates also select Google Street View. The source-specific
+license requirements below remain separate from Cartographer's MIT code
+license; publishing the code does not grant rights to provider imagery or data.
+
 ## Current prototype behavior
 
 Set `GOOGLE_MAPS_API_KEY`, `OPENAI_API_KEY`, and `CARTOGRAPHER_IMAGERY_PROVIDER=google` in the private `.env`; `backend/.env` remains a fallback. Searches use up to **16 images by default**, configurable from **4 to 48**, with fixed local spending ceilings of **$4 Google** and **$2 OpenAI**. These ceilings apply to this application's requests, not all use of the provider accounts. Radius selection accepts **25 meters to 50 kilometers**. MongoDB persistently caches job snapshots, completed searches, per-image analyses, panorama identifiers, source references, and spending reservations. An identical completed search reuses its results without another imagery or model call.
 
 Street View acquisition examines four compass headings per sampled panorama within the configured image limit. These surrounding views describe what the cameras can see; they are not a complete survey of the radius, region, or route. Acquisition is separate from actual GPT-4.1 visual analysis. Different object queries reuse available source views and perform real query-specific analysis unless that analysis is already cached. Source frames can be inspected even when no match was returned. Synthetic results are confined to the explicitly selected sample-layer mode.
 
-Google image pixels are held only in server memory for up to **10 minutes**, bounded to 32 images and 16 MiB total, with a 5 MiB per-image maximum. They are not stored on disk or in MongoDB. `GET /api/imagery/google-<opaque-id>` serves only already-fetched bytes with `Cache-Control: no-store`; it makes no external request. Expiry, buffer eviction, or a server restart makes the preview unavailable. The endpoint then returns HTTP 410 with `error.code = "imagery_expired"`. Cached jobs retain their original preview reference and analysis, along with a key-free Google Maps viewer link that remains usable when the local preview has expired.
+Google image pixels are held only in server memory for up to **10 minutes**, bounded to 64 images and 32 MiB total, with a 5 MiB per-image maximum. They are not stored on disk or in MongoDB. `GET /api/imagery/google-<opaque-id>` serves only already-fetched bytes with `Cache-Control: no-store`; it makes no external request. Expiry, buffer eviction, or a server restart makes the preview unavailable. The endpoint then returns HTTP 410 with `error.code = "imagery_expired"`. Cached jobs retain their original preview reference and analysis, along with a key-free Google Maps viewer link that remains usable when the local preview has expired.
 
 This describes the prototype's behavior, not a claim that temporary imagery or persistent analysis is authorized under Google's standard terms. User authorization to build a local prototype is not a legal exemption. There is no software flag asserting that additional Google reuse rights have been obtained. The relevant restrictions are described [below](#google-street-view-and-separately-licensed-imagery).
 
-To choose the open source, set `CARTOGRAPHER_IMAGERY_PROVIDER=panoramax` and provide the OpenAI key. Panoramax requires no Google key or new imagery token; its photographs can be stored under their individual licenses. Preserve MongoDB's local data directory and, when using licensed image files, `backend/.cache/images` when moving the project. This retains analysis caches, attribution, and the spending ledger.
+The optional alternative imagery adapter uses `CARTOGRAPHER_IMAGERY_PROVIDER=panoramax` and the OpenAI key. It does not change the configured Google default. Panoramax requires no Google key or new imagery token; its photographs can be stored under their individual licenses. Preserve MongoDB's local data directory and, when using licensed image files, `backend/.cache/images` when moving the project. This retains analysis caches, attribution, and the spending ledger.
 
 ## Location navigation
 

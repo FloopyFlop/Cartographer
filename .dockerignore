@@ -4,6 +4,9 @@ node_modules
 dist
 build
 demo
+cartographer-demo-images
+Screen Recording *.mov
+.DS_Store
 **/.venv
 **/__pycache__
 **/.pytest_cache
@@ -21,6 +24,12 @@ keys.env
 **/*.pem
 *.key
 **/*.key
+**/*.p12
+**/*.pfx
+**/*.keystore
+**/*.jks
+**/id_rsa
+**/id_ed25519
 .playwright-cli
 output
 playwright-report

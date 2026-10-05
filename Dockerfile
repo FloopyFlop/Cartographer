@@ -7,6 +7,9 @@ RUN npm ci
 COPY index.html tsconfig.json vite.config.ts postcss.config.js tailwind.config.js ./
 COPY src ./src
 COPY public ./public
+COPY scripts/release.mjs ./scripts/release.mjs
+COPY THIRD_PARTY_NOTICES.md ./THIRD_PARTY_NOTICES.md
+COPY LICENSE ./LICENSE
 RUN npm run build
 
 FROM ghcr.io/astral-sh/uv:0.8.13 AS uv

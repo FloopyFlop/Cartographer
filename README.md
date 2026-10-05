@@ -11,10 +11,18 @@ For Coolify, choose the **Docker Compose** build pack, base directory `/`, and `
 Prerequisites: Node.js 22.12+ and [uv](https://docs.astral.sh/uv/). The portable MongoDB installer supports Apple silicon and Intel macOS. On other platforms, set `CARTOGRAPHER_MONGOD_PATH` to a compatible local Community `mongod` binary, or set `CARTOGRAPHER_MONGODB_URI` to an existing MongoDB instance.
 
 ```sh
-cd /Users/abm/XVOL/ABM/Projects/Code/Cartographer
+git clone https://github.com/FloopyFlop/Cartographer.git
+cd Cartographer
 npm ci
+cp .env.example .env
 npm run dev
 ```
+
+Choose **Sample data** to try the search workflow without provider credentials.
+For live searches, add your own Google Maps and OpenAI keys to the private
+`.env`, enable Street View Static API, and keep
+`CARTOGRAPHER_IMAGERY_PROVIDER=google`. This uses the same Street View imagery,
+visual analysis, interface, and caching workflow as the prototype.
 
 Open [Cartographer](http://127.0.0.1:5173). The single npm command starts portable MongoDB, Vite, and the Flask API together. On first start it downloads the pinned official MongoDB Community archive, verifies its SHA-256 checksum, and extracts it inside `.cache/mongodb`. MongoDB data lives in `backend/.cache/mongodb/data` and binds only to localhost on port 27018. There is no system installation, Homebrew service, Docker requirement, or Atlas account. Python dependencies and execution use uv, a backend-local virtual environment, and a local uv cache.
 
@@ -56,7 +64,7 @@ The structured area is authoritative. Natural language is passed intact to visua
 
 ## Credentials, caching, and spending
 
-The backend reads `.env` first and supports `backend/.env` as a fallback. For a new setup, copy `.env.example` to `.env`. For the default Google prototype, set `GOOGLE_MAPS_API_KEY` and `OPENAI_API_KEY`, enable the Street View Static API on the Google project, and keep `CARTOGRAPHER_IMAGERY_PROVIDER=google`. Enable the Geocoding API on that key's project for arbitrary location navigation. Credentials are read only by Flask, never bundled into React. The local configured `.env`, licensed image files, MongoDB binaries, and database files are ignored by Git.
+The backend reads `.env` first and supports `backend/.env` as a fallback. For a new setup, copy `.env.example` to `.env`, set your own `GOOGLE_MAPS_API_KEY` and `OPENAI_API_KEY`, and keep `CARTOGRAPHER_IMAGERY_PROVIDER=google`. Enable Street View Static API on the Google project, and enable Geocoding API for arbitrary Google location navigation. Credentials are read only by Flask, never bundled into React. Private environment files, image caches, MongoDB files, backups, and local demo recordings are ignored by Git.
 
 The persistent ledger fixes this instance's ceilings at **$4 Google** and **$2 OpenAI**. Every paid call reserves conservative headroom atomically before sending; reservations survive timeouts and restarts. OpenAI calls have no automatic retries. Usage is available through **Usage & sources** in the application.
 
@@ -122,3 +130,20 @@ npm audit
 These checks make no paid provider requests. A manually invoked `node scripts/smoke-live.mjs` performs a bounded real search and verifies the repeated-run cache; it can spend a small amount of the local Google and OpenAI budgets with the default source and is deliberately excluded from automated tests.
 
 Browser checks cover the dark desktop/mobile layout, sample search progression, selection, layer controls, geographic drawing, location navigation, map appearance, and usage dialog. The supplied `.gitignore` excludes browser artifacts.
+
+## Contributions and third-party materials
+
+Cartographer is licensed under [MIT](LICENSE), copyright 2026 Cartographer
+contributors. Third-party software, imagery, map data, and remote services
+retain their own licenses and terms.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development checks and
+[SECURITY.md](SECURITY.md) for private vulnerability reports and credential
+handling. Use your own runtime credentials; no keys, database backups, cached
+imagery, or local recordings are included in this repository or its release.
+
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) identifies the supplied Titanium
+source, map style, copied interface components, fonts, and dependencies. Every
+build preserves their original license texts in `dist/licenses/`, including in
+Docker and release bundles. Imagery, map data, and remote services retain their
+separate licenses and terms.

@@ -7,13 +7,13 @@ This deployment provides one password-protected application instance. It is not 
 ## Coolify setup
 
 1. Add this Git repository as a Coolify application and select **Docker Compose** as the build pack. The application lives at the repository root: use base directory `/` and Compose location `/docker-compose.yaml`.
-2. Add the runtime variables `OPENAI_API_KEY`, `GOOGLE_MAPS_API_KEY`, and a strong `CARTOGRAPHER_AUTH_PASSWORD`. Optionally set `CARTOGRAPHER_AUTH_USERNAME`; its default is `cartographer`. Enable Google Street View Static API and Geocoding API for the server's Google key. Keep keys private and configure provider-side restrictions for the deployed server.
+2. Add your own `OPENAI_API_KEY`, `GOOGLE_MAPS_API_KEY`, and a strong `CARTOGRAPHER_AUTH_PASSWORD`. Keep `CARTOGRAPHER_IMAGERY_PROVIDER=google`. Optionally set `CARTOGRAPHER_AUTH_USERNAME`; its default is `cartographer`. Enable Google Street View Static API and Geocoding API on the Google project. Keep keys private and configure provider-side restrictions for the deployed server.
 3. Set a domain on the **cartographer** service, including its internal port, for example `https://cartographer.example.com:5050`. Coolify terminates HTTPS and sends traffic to port 5050; visitors use the ordinary HTTPS address. Give the MongoDB service no domain and no published ports.
    Disable **Escape special characters in labels** and keep **Raw Compose Deployment** off. The Compose label selects Coolify's generated resource network for Traefik, so the proxy cannot accidentally route through the private database network. This matters on Coolify 4.1.2; the label uses `COOLIFY_RESOURCE_UUID` supplied by Coolify and falls back to the ordinary Compose network locally.
 4. Keep the Compose-managed `mongo-data` and `application-cache` volumes. Deploy the application. To carry over the existing prototype's caches and spending totals, restore the private backup described below before running any live searches. The MongoDB health check must succeed before the API starts; `/api/health` then checks database readiness without making paid provider requests.
 5. Open the HTTPS domain, sign in with the configured username/password, and first verify navigation and **Sample data**. Real searches call the configured imagery and vision providers and consume the instance's remaining budget.
 
-The Compose file forces `CARTOGRAPHER_AUTH_REQUIRED=true` and refuses configuration without the required credentials and password. Only the minimal health probe is public; the interface, assets, and other API routes require the same HTTP Basic authentication. Always use HTTPS for a public deployment.
+The Compose file forces `CARTOGRAPHER_AUTH_REQUIRED=true` and refuses configuration without the provider keys and access password. Google Street View is the configured source. Only the minimal health probe is public; the interface, assets, and other API routes require the same HTTP Basic authentication. Always use HTTPS for a public deployment.
 
 The frontend also sends `X-Cartographer-Request: 1` for API requests. Protected deployments require this header for mutating API methods and paid remote location lookups, preventing third-party forms or embedded URLs from using a signed-in browser's credentials to spend the budget. Direct API clients must supply the header along with authentication; read-only photos and the health probe remain accessible through their normal request paths.
 
@@ -42,9 +42,9 @@ The official MongoDB container is reachable only on the internal database networ
 
 The ceilings remain **$4 for Google** and **$2 for OpenAI**, enforced by the application's persistent ledger. They are instance ceilings, not provider-account limits. Deploying into a fresh volume creates a fresh ledger; moving this application must include a backup and restore of the existing MongoDB database if previous spending should remain accounted for. Preserve uncertain reservations as well as charged totals. Do not remove or reset the database to refresh search results.
 
-### Carry the local prototype into Coolify
+### Move data between deployments
 
-The verified local backup is in `build/private/mongodb/cartographer/`, also packaged as `build/private/cartographer-mongodb.tar.gz`. It contains standard BSON collection dumps and index metadata, including all cached analyses, completed jobs and the existing spending ledger. It deliberately excludes credentials and Google photograph bytes. This private backup is ignored by Git and omitted from the public release archive; transfer it separately to your server and extract the archive to obtain the `mongodb/` parent folder.
+With searches stopped, run `npm run db:backup` to create a private local backup under `build/private/mongodb/`. The helper writes standard BSON collection dumps and index metadata, including cached analyses, completed jobs, and the spending ledger. It briefly locks database writes, releases the lock on completion or failure, and refuses to overwrite an existing backup. Move an earlier backup to another private location before creating a new one. Credentials and Google photograph bytes are excluded. Transfer your backup separately to the destination server; never commit database backups or add them to a public release.
 
 Stop the application service before restoring. In the Coolify deployment's Compose directory on the server, with its runtime variables available, use the following commands against a **fresh destination database**. Replace `/path/to/mongodb` with the copied parent folder containing `cartographer/`:
 
@@ -56,21 +56,21 @@ docker compose exec -T mongo mongorestore --nsInclude='cartographer.*' /tmp/cart
 docker compose up -d cartographer
 ```
 
-Use Coolify's existing Compose project and environment for these operations; do not create a second deployment or new volumes. The official MongoDB image includes `mongorestore`. Check **Usage & sources** after signing in: this backup preserves Google usage of **$0.567**, OpenAI usage of **$0.208352**, and an unresolved OpenAI reservation of **$0.04**. The backup was restored into a separate test database and every document and index was compared successfully.
+Use Coolify's existing Compose project and environment for these operations; do not create a second deployment or new volumes. The official MongoDB image includes `mongorestore`. Compare collection counts and indexes before enabling searches, then check **Usage & sources** after signing in. Charged totals and unresolved reservations must match the source database.
 
-Do not restore an old dump over a deployment that has already incurred new usage. Preserve that deployment's newer ledger and data instead; do not use `--drop` to reset spending. For another local snapshot, run `npm run db:backup` with searches stopped. The helper briefly locks writes, releases the lock on completion or failure, and refuses to overwrite an existing backup. Move the previous backup to another private location before running it again.
+Do not restore an old dump over a deployment that has already incurred new usage. Preserve that deployment's newer ledger and data instead; do not use `--drop` to reset spending.
 
 Before replacing a deployed instance, back up MongoDB using `mongodump` and restore into the destination with `mongorestore`, using the MongoDB tools matching the deployment. Keep the same database name, and back up `application-cache` when it contains licensed source photographs. Coolify volume persistence is not itself a backup. Keep the previous data until the restored ledger and caches have been verified. Do not run `docker compose down --volumes` unless intentionally deleting both persistent volumes.
 
 Updates rebuild the image and retain these volumes. Active in-memory jobs are interrupted during restart; completed results and the ledger persist. Authentication is shared rather than per user, so anyone with the password shares the same data and spending ceiling. Public multi-user operation would additionally require account-scoped permissions and budgets, request controls, and durable worker coordination.
 
-The default Google Street View source remains subject to Google's reuse and display terms. Deployment, password protection, and temporary image storage do not grant an exception. Review [imagery sources and terms](imagery-sources.md) before publishing the application. Panoramax is an optional licensed alternative through `CARTOGRAPHER_IMAGERY_PROVIDER=panoramax`.
+Google Street View remains subject to Google's reuse and display terms. Deployment, password protection, temporary image storage, and Cartographer's MIT code license do not grant an exception. Review [imagery sources and terms](imagery-sources.md) before using the imagery adapter.
 
 ## Container verification
 
 The image was built and run on Linux ARM64 through Docker on October 3, 2026. Both Compose services became healthy. Checks covered the public minimal health response, authentication for the interface and API, authenticated provider availability, the built JavaScript and Cesium assets, JSON API errors, nonroot UID 10001, a writable persistent cache, and exclusion of credential files from the image. The validation instance made no paid provider requests and retained zero charged or reserved usage. Its separate database volume did not replace the existing local ledger.
 
-The Node, Python, uv, and MongoDB base images also publish Linux AMD64 manifests for typical Coolify servers. AMD64 runtime execution and a real Coolify deployment have not been verified here. The release folder contains the same Docker configuration; deploy one instance and verify its HTTPS domain and persistence after installation.
+The Node, Python, uv, and MongoDB base images also publish Linux AMD64 manifests for typical Coolify servers. AMD64 runtime execution has not been verified locally. A Coolify deployment was verified through its HTTPS domain after selecting the correct Traefik network; authentication and a sample search worked. The release folder contains the same Docker configuration. Verify the domain and persistent data after installing your own instance.
 
 ## References
 
