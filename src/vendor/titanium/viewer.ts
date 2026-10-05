@@ -86,6 +86,10 @@ export function initializeViewer(container: HTMLElement): ViewerHandle {
   viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#101114')
   viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#090a0c')
   viewer.scene.globe.enableLighting = false
+  // Cesium adds blue scattering after imagery desaturation. Keep the neutral
+  // palette while retaining fog's tile-loading optimization.
+  viewer.scene.globe.showGroundAtmosphere = false
+  viewer.scene.fog.renderable = false
   viewer.useBrowserRecommendedResolution = false
   viewer.resolutionScale = Math.min(1.5, Math.max(1, window.devicePixelRatio))
   viewer.scene.globe.maximumScreenSpaceError = 0.9
